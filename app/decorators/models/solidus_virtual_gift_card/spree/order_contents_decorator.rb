@@ -18,16 +18,35 @@ module SolidusVirtualGiftCard
       def update_cart(params)
         update_success = super(params)
 
-        if update_success && params[:line_items_attributes]
-          line_item = ::Spree::LineItem.find_by(id: params[:line_items_attributes][:id])
-          new_quantity = params[:line_items_attributes][:quantity].to_i
-          update_gift_cards(line_item, new_quantity)
-        end
+        return update_success unless update_success && params[:line_items_attributes]
+
+        line_items_attributes = normalize_line_items_attributes(params[:line_items_attributes])
+
+        update_gift_cards_for_line_items(line_items_attributes)
 
         update_success
       end
 
       private
+
+      def normalize_line_items_attributes(line_items_attributes)
+        if line_items_attributes.is_a?(Hash)
+          { line_items_attributes[:variant_id] => line_items_attributes }
+        elsif line_items_attributes.is_a?(Array)
+          line_items_attributes.index_by { |attr| attr[:variant_id] }
+        else
+          line_items_attributes.values.index_by { |attr| attr[:variant_id].to_i }
+        end
+      end
+
+      def update_gift_cards_for_line_items(line_items_attributes)
+        order.line_items.where(variant_id: line_items_attributes.keys).find_each do |line_item|
+          attributes = line_items_attributes[line_item.variant_id]
+          new_quantity = attributes[:quantity].to_i if attributes
+
+          update_gift_cards(line_item, new_quantity) if new_quantity
+        end
+      end
 
       def create_gift_cards(line_item, quantity_diff, gift_card_details = {})
         if line_item.gift_card?
