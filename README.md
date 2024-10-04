@@ -10,6 +10,8 @@ A virtual gift card implementation for Solidus.
 * The virtual gift card codes can be used to add store credit to a user's
   account.
 
+Compatible with Solidus Core <= 4
+
 Installation
 ------------
 

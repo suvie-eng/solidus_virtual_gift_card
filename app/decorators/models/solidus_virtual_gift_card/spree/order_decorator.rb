@@ -5,7 +5,10 @@ module SolidusVirtualGiftCard
     module OrderDecorator
       def self.prepended(base)
         base.class_eval do
-          state_machine.after_transition to: :complete, do: :send_gift_card_emails
+          # Only add the callback if sending emails is enabled
+          if SolidusVirtualGiftCard.configuration.gift_card_email_notifications_enabled
+            state_machine.after_transition to: :complete, do: :send_gift_card_emails
+          end
 
           has_many :gift_cards, through: :line_items
         end
@@ -22,7 +25,7 @@ module SolidusVirtualGiftCard
         end
       end
 
-      def finalize!
+      def complete!
         super
         inventory_units = self.inventory_units
         gift_cards.each_with_index do |gift_card, index|
