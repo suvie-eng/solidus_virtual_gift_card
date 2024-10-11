@@ -30,9 +30,10 @@ module SolidusVirtualGiftCard
       private
 
       def normalize_line_items_attributes(line_items_attributes)
-        if line_items_attributes.is_a?(Hash)
-          { line_items_attributes[:variant_id] => line_items_attributes }
-        elsif line_items_attributes.is_a?(Array)
+        case line_items_attributes
+        when Hash
+          { line_items_attributes[:id] => line_items_attributes }
+        when Array
           line_items_attributes.index_by { |attr| attr[:variant_id] }
         else
           line_items_attributes.values.index_by { |attr| attr[:variant_id].to_i }
@@ -40,11 +41,10 @@ module SolidusVirtualGiftCard
       end
 
       def update_gift_cards_for_line_items(line_items_attributes)
-        order.line_items.where(variant_id: line_items_attributes.keys).find_each do |line_item|
-          attributes = line_items_attributes[line_item.variant_id]
-          new_quantity = attributes[:quantity].to_i if attributes
+        line_items_attributes.each do |_, attributes|
+          line_item = ::Spree::LineItem.find_by(id: attributes[:id]) || order.line_items.find_by(variant_id: attributes[:variant_id])
 
-          update_gift_cards(line_item, new_quantity) if new_quantity
+          update_gift_cards(line_item, attributes[:quantity].to_i) if line_item
         end
       end
 
