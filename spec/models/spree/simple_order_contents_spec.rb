@@ -5,10 +5,10 @@ require 'spec_helper'
 
 describe 'Spree::SimpleOrderContents' do
   let(:described_class) do
-    if Object.const_defined?('Spree::SimpleOrderContents')
-      Spree::SimpleOrderContents
-    else
+    if Object.const_defined?('Spree::OrderContents')
       Spree::OrderContents
+    else
+      Spree::SimpleOrderContents
     end
   end
   let(:order) { create(:order) }
