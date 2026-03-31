@@ -2,7 +2,15 @@
 
 require 'spec_helper'
 
-describe Spree::OrderContents do
+
+describe 'Spree::SimpleOrderContents' do
+  let(:described_class) do
+    if Object.const_defined?('Spree::OrderContents')
+      Spree::OrderContents
+    else
+      Spree::SimpleOrderContents
+    end
+  end
   let(:order) { create(:order) }
   let(:variant) { create(:variant) }
   let(:order_contents) { described_class.new(order) }

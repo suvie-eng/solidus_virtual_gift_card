@@ -93,7 +93,20 @@ module SolidusVirtualGiftCard
         end
       end
 
-      ::Spree::OrderContents.prepend self
+      contents_class = ::Spree::Config.order_contents_class
+
+      contents_class =
+        case contents_class
+        when Class
+          contents_class
+        when String
+          contents_class.safe_constantize
+        end
+
+      contents_class ||= ::Spree::OrderContents if Object.const_defined?('::Spree::OrderContents')
+      contents_class ||= ::Spree::SimpleOrderContents if Object.const_defined?('::Spree::SimpleOrderContents')
+
+      contents_class.prepend(self)
     end
   end
 end
