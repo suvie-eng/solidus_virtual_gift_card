@@ -1,0 +1,5 @@
+<!-- replace "erb[loud]:contains('BackendConfiguration::USER_TABS')" -->
+
+<%= tab *Spree::BackendConfiguration::USER_TABS, url: spree.admin_users_path, icon: 'user' do %>
+  <%- render "spree/admin/users/sub_menu" %>
+<%- end %>
